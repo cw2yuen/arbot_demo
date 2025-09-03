@@ -11,7 +11,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 class LightweightArboAgent:
     def __init__(self):
         import openai
-        self.client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        self.client = openai.OpenAI(api_key=api_key)
         self.model = os.getenv('OPENAI_MODEL', 'gpt-4')
         
         # Pre-defined knowledge base for Arbo Dental Care
@@ -183,7 +186,9 @@ class handler(BaseHTTPRequestHandler):
             self.send_json_response(200, response_data)
             
         except Exception as e:
-            self.send_error_response(500, f'An error occurred: {str(e)}')
+            error_msg = f'An error occurred: {str(e)}'
+            print(f"Chat API Error: {error_msg}")  # Log for debugging
+            self.send_error_response(500, error_msg)
     
     def do_GET(self):
         """Handle GET requests"""
