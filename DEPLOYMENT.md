@@ -55,17 +55,14 @@ vercel
 4. Import your GitHub repository
 5. Vercel will automatically detect the configuration
 
-### 4. Build the Knowledge Base
+### 4. Knowledge Base
 
-After deployment, you need to build the knowledge base:
+The deployment uses a **lightweight knowledge base** that's built into the code:
 
-1. **Option 1: Use existing data**
-   - The `data/` directory contains pre-scraped data
-   - The knowledge base will be built automatically on first request
-
-2. **Option 2: Rebuild with fresh data**
-   - Run the data preparation scripts locally
-   - Upload the `chroma_db/` directory to your Vercel project
+- **No external database required** - all information is embedded in the code
+- **Faster deployment** - no need to build ChromaDB or download models
+- **Lower memory usage** - optimized for Vercel's serverless environment
+- **Same functionality** - answers all common questions about Arbo Dental Care
 
 ### 5. Test Your Deployment
 
@@ -105,15 +102,19 @@ Visit your Vercel URL and test:
 
 1. **"AI agent is not available"**
    - Check that `OPENAI_API_KEY` is set correctly
-   - Verify the knowledge base is built
+   - The lightweight version doesn't require a pre-built knowledge base
 
 2. **"Module not found" errors**
    - Ensure all dependencies are in `requirements.txt`
    - Check that file paths are correct
 
-3. **Slow responses**
+3. **Out of Memory (OOM) errors during build**
+   - The lightweight version uses a simple keyword-based knowledge base instead of ChromaDB
+   - This reduces memory usage significantly for Vercel deployment
+
+4. **Slow responses**
    - Vercel has a 30-second timeout for serverless functions
-   - Consider optimizing the knowledge base size
+   - The lightweight version should respond much faster
 
 ### Debug Mode
 

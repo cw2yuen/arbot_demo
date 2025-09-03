@@ -6,19 +6,18 @@ from http.server import BaseHTTPRequestHandler
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ai_agent.arbo_agent import ArboDentalAgent
-from data_preparation.knowledge_base import ArboDentalKnowledgeBase
+# Import the lightweight agent from chat.py
+from api.chat import LightweightArboAgent
 
 # Global agent instance
 agent = None
 
 def initialize_agent():
-    """Initialize the knowledge base and AI agent"""
+    """Initialize the lightweight AI agent"""
     global agent
     if agent is None:
         try:
-            kb = ArboDentalKnowledgeBase()
-            agent = ArboDentalAgent(kb)
+            agent = LightweightArboAgent()
         except Exception as e:
             print(f"Error initializing agent: {e}")
             agent = None
@@ -33,7 +32,24 @@ class handler(BaseHTTPRequestHandler):
                 self.send_error_response(500, 'Agent not available')
                 return
             
-            info = agent.get_agent_info()
+            info = {
+                'agent_type': 'Arbo Dental Care AI Assistant (Lightweight)',
+                'model': agent.model,
+                'knowledge_base_chunks': len(agent.knowledge_base),
+                'capabilities': [
+                    'Answer questions about Arbo Dental Care',
+                    'Provide team member information',
+                    'List services offered',
+                    'Share contact information',
+                    'Direct to office for appointments'
+                ],
+                'limitations': [
+                    'Cannot make appointments',
+                    'Cannot provide medical advice',
+                    'Cannot give specific pricing',
+                    'Cannot diagnose dental problems'
+                ]
+            }
             self.send_json_response(200, info)
             
         except Exception as e:
