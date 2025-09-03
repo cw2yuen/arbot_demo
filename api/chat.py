@@ -155,11 +155,17 @@ class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         """Handle POST requests to /api/chat"""
         try:
+            print("Chat API: POST request received")  # Debug log
+            
             # Initialize agent if not already done
+            print("Chat API: Initializing agent...")  # Debug log
             agent = initialize_agent()
             if agent is None:
+                print("Chat API: Agent initialization failed")  # Debug log
                 self.send_error_response(500, 'AI agent is not available. Please check configuration.')
                 return
+            
+            print("Chat API: Agent initialized successfully")  # Debug log
             
             # Parse request body
             content_length = int(self.headers['Content-Length'])
@@ -171,8 +177,12 @@ class handler(BaseHTTPRequestHandler):
                 self.send_error_response(400, 'Message is required')
                 return
             
+            print(f"Chat API: Processing message: {user_message[:50]}...")  # Debug log
+            
             # Process the query
             result = agent.process_query(user_message)
+            
+            print("Chat API: Query processed successfully")  # Debug log
             
             # Send response
             response_data = {
