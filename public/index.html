@@ -74,6 +74,7 @@
             font-size: 12px;
             cursor: pointer;
             transition: background 0.3s ease;
+            display: none; /* Hidden by default */
         }
 
         .debug-mode-toggle:hover {
@@ -82,6 +83,19 @@
 
         .debug-mode-toggle.active {
             background: #28a745;
+        }
+
+        /* Show debug elements only when debug mode is enabled */
+        .debug-mode .debug-mode-toggle {
+            display: block;
+        }
+
+        .debug-mode .quick-question.debug-only {
+            display: block;
+        }
+
+        .quick-question.debug-only {
+            display: none;
         }
 
         @keyframes pulse {
@@ -357,13 +371,13 @@
         <div class="chat-messages" id="chatMessages">
             <div class="welcome-message">
                 <h3>Welcome to Arbo Dental Care! 👋</h3>
-                <p>I'm here to help you with information about our dental practice. Ask me anything about our services, team, location, or general dental care questions.</p>
+                <p>I'm Arbot, your AI assistant. I'm here to help you with information about our dental practice. Ask me anything about our services, team, location, or general dental care questions.</p>
                 <div class="quick-questions">
-                    <div class="quick-question" onclick="askQuestion('What is the address of Arbo Dental Care?')">📍 Address</div>
-                    <div class="quick-question" onclick="askQuestion('What are your office hours?')">🕒 Hours</div>
-                    <div class="quick-question" onclick="askQuestion('What services do you provide?')">🦷 Services</div>
-                    <div class="quick-question" onclick="askQuestion('Who are the team members?')">👥 Team</div>
-                    <div class="quick-question" onclick="testDebugEndpoint()" style="background: #28a745; color: white;">🧪 Test Debug</div>
+                    <div class="quick-question debug-only" onclick="askQuestion('What is the address of Arbo Dental Care?')">📍 Address</div>
+                    <div class="quick-question debug-only" onclick="askQuestion('What are your office hours?')">🕒 Hours</div>
+                    <div class="quick-question debug-only" onclick="askQuestion('What services do you provide?')">🦷 Services</div>
+                    <div class="quick-question debug-only" onclick="askQuestion('Who are the team members?')">👥 Team</div>
+                    <div class="quick-question debug-only" onclick="testDebugEndpoint()" style="background: #28a745; color: white;">🧪 Test Debug</div>
                 </div>
             </div>
         </div>
@@ -390,8 +404,20 @@
         const typingIndicator = document.getElementById('typingIndicator');
         const debugModeToggle = document.getElementById('debugModeToggle');
         
-        // Debug mode state
+        // Debug mode state - check URL parameter
         let debugMode = false;
+        
+        // Check for debug parameter in URL
+        function checkDebugMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            debugMode = urlParams.get('debug') === 'true';
+            
+            if (debugMode) {
+                document.body.classList.add('debug-mode');
+                debugModeToggle.classList.add('active');
+                debugModeToggle.textContent = '🔍 Debug ON';
+            }
+        }
 
         // Add message to chat
         function addMessage(content, isUser = false, confidence = null, sources = [], debugInfo = null) {
@@ -558,9 +584,11 @@
         debugModeToggle.addEventListener('click', () => {
             debugMode = !debugMode;
             if (debugMode) {
+                document.body.classList.add('debug-mode');
                 debugModeToggle.classList.add('active');
                 debugModeToggle.textContent = '🔍 Debug ON';
             } else {
+                document.body.classList.remove('debug-mode');
                 debugModeToggle.classList.remove('active');
                 debugModeToggle.textContent = '🔍 Debug Mode';
             }
@@ -568,6 +596,7 @@
 
         // Auto-focus input on load
         window.addEventListener('load', () => {
+            checkDebugMode(); // Check for debug mode on page load
             chatInput.focus();
         });
     </script>
