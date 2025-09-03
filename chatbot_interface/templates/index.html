@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbot, Arbo Dental Care's Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .debug-mode-toggle {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .debug-mode-toggle:hover {
+            background: #5a6268;
+        }
+
+        .debug-mode-toggle.active {
+            background: #28a745;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+            color: #666;
+            font-style: italic;
+        }
+
+
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .debug-toggle {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .debug-toggle:hover {
+            background: #5a6268;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .welcome-message h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .quick-question {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .quick-question:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 90vh;
+                border-radius: 15px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .chat-header h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="status-indicator"></div>
+            <button class="debug-mode-toggle" id="debugModeToggle">🔍 Debug Mode</button>
+            <h1>🦷🤖 Arbot, Arbo Dental Care's Assistant</h1>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <h3>Welcome to Arbo Dental Care! 👋</h3>
+                <p>I'm here to help you with information about our dental practice. Ask me anything about our services, team, location, or general dental care questions.</p>
+                <div class="quick-questions">
+                    <div class="quick-question" onclick="askQuestion('What is the address of Arbo Dental Care?')">📍 Address</div>
+                    <div class="quick-question" onclick="askQuestion('What are your office hours?')">🕒 Hours</div>
+                    <div class="quick-question" onclick="askQuestion('What services do you provide?')">🦷 Services</div>
+                    <div class="quick-question" onclick="askQuestion('Who are the team members?')">👥 Team</div>
+                    <div class="quick-question" onclick="testDebugEndpoint()" style="background: #28a745; color: white;">🧪 Test Debug</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            Arbo Dental Care AI is typing...
+        </div>
+
+        <div class="chat-input-container">
+            <form class="chat-input-form" id="chatForm">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask me about Arbo Dental Care..." autocomplete="off">
+                <button type="submit" class="send-button" id="sendButton">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const debugModeToggle = document.getElementById('debugModeToggle');
+        
+        // Debug mode state
+        let debugMode = false;
+
+        // Add message to chat
+        function addMessage(content, isUser = false, confidence = null, sources = [], debugInfo = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? 'U' : 'A';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content;
+            
+            // Add debug information if available and debug mode is enabled
+            if (!isUser && debugInfo && debugMode) {
+                const debugToggle = document.createElement('button');
+                debugToggle.className = 'debug-toggle';
+                debugToggle.textContent = '🔍 Show Details';
+                debugToggle.onclick = function() {
+                    const debugDiv = this.nextElementSibling;
+                    if (debugDiv.style.display === 'none') {
+                        debugDiv.style.display = 'block';
+                        this.textContent = '🔍 Hide Details';
+                    } else {
+                        debugDiv.style.display = 'none';
+                        this.textContent = '🔍 Show Details';
+                    }
+                };
+                messageContent.appendChild(debugToggle);
+                
+                const debugDiv = document.createElement('div');
+                debugDiv.className = 'debug-info';
+                debugDiv.style.display = 'none';
+                
+                let debugText = `Search Results: ${debugInfo.search_results_count}\n`;
+                debugText += `Confidence: ${(confidence * 100).toFixed(1)}%\n`;
+                debugText += `Sources: ${sources.join(', ')}\n`;
+                debugText += `Context Preview: ${debugInfo.context_preview}\n\n`;
+                
+                debugInfo.search_results.forEach((result, index) => {
+                    debugText += `Result ${index + 1}:\n`;
+                    debugText += `Text: ${result.text}\n`;
+                    debugText += `Distance: ${result.distance.toFixed(4)}\n`;
+                    debugText += `Length: ${result.text_length} chars\n`;
+                    debugText += `Metadata: ${JSON.stringify(result.metadata, null, 2)}\n\n`;
+                });
+                
+                debugDiv.textContent = debugText;
+                messageContent.appendChild(debugDiv);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show/hide typing indicator
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        // Ask a question (for quick questions)
+        function askQuestion(question) {
+            chatInput.value = question;
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+
+        // Test debug endpoint
+        async function testDebugEndpoint() {
+            try {
+                console.log('🧪 Testing debug endpoint...');
+                const response = await fetch('/api/debug-test');
+                const data = await response.json();
+                console.log('🧪 Debug test result:', data);
+                
+                if (response.ok) {
+                    addMessage(`Debug test completed! Check console for details. Has debug_info: ${data.has_debug_info}`, false);
+                } else {
+                    addMessage(`Debug test failed: ${data.error}`, false);
+                }
+            } catch (error) {
+                console.error('🧪 Debug test error:', error);
+                addMessage(`Debug test error: ${error.message}`, false);
+            }
+        }
+
+        // Handle form submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const message = chatInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, true);
+            chatInput.value = '';
+            
+            // Disable input and button
+            chatInput.disabled = true;
+            sendButton.disabled = true;
+            
+            // Show typing indicator
+            showTyping();
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Log the entire response for debugging
+                console.log('📡 Full API Response:', data);
+                
+                if (response.ok) {
+                    addMessage(data.response, false, data.confidence, data.sources, data.debug_info);
+                    
+                    // Log debug info to console if available
+                    if (data.debug_info) {
+                        console.log('🔍 Debug Info:', data.debug_info);
+                        console.log('📊 Search Results:', data.debug_info.search_results);
+                        console.log('📝 Context Preview:', data.debug_info.context_preview);
+                    } else {
+                        console.log('⚠️ No debug_info in response');
+                    }
+                } else {
+                    addMessage(`Error: ${data.error}`, false);
+                }
+            } catch (error) {
+                addMessage(`Sorry, I'm having trouble connecting right now. Please try again later.`, false);
+                console.error('Error:', error);
+            } finally {
+                // Re-enable input and button
+                chatInput.disabled = false;
+                sendButton.disabled = false;
+                chatInput.focus();
+                
+                // Hide typing indicator
+                hideTyping();
+            }
+        });
+
+        // Handle Enter key
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Debug mode toggle
+        debugModeToggle.addEventListener('click', () => {
+            debugMode = !debugMode;
+            if (debugMode) {
+                debugModeToggle.classList.add('active');
+                debugModeToggle.textContent = '🔍 Debug ON';
+            } else {
+                debugModeToggle.classList.remove('active');
+                debugModeToggle.textContent = '🔍 Debug Mode';
+            }
+        });
+
+        // Auto-focus input on load
+        window.addEventListener('load', () => {
+            chatInput.focus();
+        });
+    </script>
+</body>
+</html>

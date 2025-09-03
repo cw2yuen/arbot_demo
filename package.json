@@ -1,0 +1,23 @@
+{
+  "name": "arbot-agent-n8n",
+  "version": "1.0.0",
+  "description": "Arbo Dental Care AI Assistant - Arbot",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Build completed'",
+    "start": "echo 'Starting serverless functions'"
+  },
+  "keywords": [
+    "dental",
+    "ai",
+    "assistant",
+    "chatbot",
+    "vercel"
+  ],
+  "author": "Arbo Dental Care",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
